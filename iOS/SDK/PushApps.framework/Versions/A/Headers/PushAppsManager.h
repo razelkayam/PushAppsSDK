@@ -21,6 +21,9 @@ typedef void(^tagStatus)(BOOL success, NSString *msg);
 @optional
 - (void)pushApps:(PushAppsManager *)manager didUpdateUserToken:(NSString *)pushToken;
 
+@optional
+- (void)pushApps:(PushAppsManager *)manager registrationForRemoteNotificationFailedWithError:(NSError *)error;
+
 @end
 
 @interface PushAppsManager : NSObject
@@ -48,6 +51,15 @@ typedef void(^tagStatus)(BOOL success, NSString *msg);
 - (void)startPushAppsWithAppToken:(NSString *)appToken withLaunchOptions:(NSDictionary *)launchOptions;
 
 /**
+ *  A method to identify an application with PushApps. Method is critical since it starts the registration to Push Notification message services.
+ *
+ *  @param appToken an NSString "hard coded" token retrived from PushApps web site, under "My Apps", "setting". each app token is a unique token, designated to be used in a single application.
+ *  @param launchOptions An NSDictionary object passed as a parameter with in the delegate method application:didFinishLaunchingWithOptions.
+ *  @param customId An NSString object passed as a parameter for unuiquly identifying a device.
+ */
+- (void)startPushAppsWithAppToken:(NSString *)appToken withLaunchOptions:(NSDictionary *)launchOptions andCustomId:(NSString *)customId;
+
+/**
  *  A method to finalize the registration to PushApps. Method is critical since it provides the device ID.
  *
  *  @param data an NSData object which encapsulates device data.
@@ -56,12 +68,18 @@ typedef void(^tagStatus)(BOOL success, NSString *msg);
 - (void)updatePushToken:(NSData *)data;
 
 /**
- *  A method to unregister a device by it's device ID (UDID).
+ *  A method to keep PushApps updated with Push Notification Errors.
  *
- *  @param deviceID an NSString containing the device UDID uniqu identifier.
+ *  @param error an NSError object which represents an Error.
  *
  */
-- (void)unregisterFromPushNotificationsByDeviceId:(NSString *)deviceID;
+- (void)updatePushError:(NSError *)error;
+
+/**
+ *  A method to unregister a device by it's device ID (UDID).
+ *
+ */
+- (void)unregisterFromPushNotificationsByDeviceId;
 
 /**
  *  A method to report a new push notification event.
@@ -98,7 +116,7 @@ typedef void(^tagStatus)(BOOL success, NSString *msg);
  *
  *  @discussion Use this method to Handle 'Silent Push'. Method takes care of the fetchComplitionHandlerResualt when it finishes.
  */
-- (void)handlePushMessageForUserInfo:(NSDictionary *)userInfo WithFetchComplitionHandlerResualt:(fetchComplitionHandlerResualt)fetchComplitionHandlerResualt;
+//- (void)handlePushMessageForUserInfo:(NSDictionary *)userInfo WithFetchComplitionHandlerResualt:(fetchComplitionHandlerResualt)fetchComplitionHandlerResualt;
 
 #pragma mark - Tags
 
@@ -205,6 +223,15 @@ typedef void(^tagStatus)(BOOL success, NSString *msg);
 #pragma mark - Helper Methods
 
 /**
+ *  A method to know if push notifications status is enabled.
+ *
+ *  @return a BOOL value indicating the status.
+ *
+ *  @discussion function returns NO when ever the user did not approve any notification. i.e. if user approve only UIRemoteNotificationTypeSound, function will return YES
+ */
+- (BOOL)arePushNotificationsEnabled;
+
+/**
  *  A method to clear all application badges.
  *
  */
@@ -237,5 +264,12 @@ typedef void(^tagStatus)(BOOL success, NSString *msg);
  *  @return an NSString containing the app version.
  */
 - (NSString *)getAppVersion;
+
+/**
+ *  Method to retrive the custom ID of the device, as identified by the developer. note! this is not the UDID of the device.
+ *
+ *  @return an NSString custom ID which the developer inputed in the registration process.
+ */
+- (NSString *)getCustomId;
 
 @end
